@@ -1,4 +1,5 @@
-version: '2.4'
+version: "3.8"
+
 services:
   cache:
     image: redis:7.4.2-alpine3.21
@@ -7,6 +8,7 @@ services:
     restart: always
     networks:
       - pokedex-network
+
   db:
     image: postgres:17.2-alpine3.21
     environment:
@@ -16,21 +18,25 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: pg_isready
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-ash}", "-d", "${POSTGRES_DB:-pokeapi}"]
       interval: 10s
       timeout: 5s
       retries: 5
     restart: always
     networks:
       - pokedex-network
+
   app:
+    build:
+      context: ../PokeAPI
+      dockerfile: Dockerfile
     user: ${RUN_AS:-pokeapi}
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pokemon}
       POSTGRES_USER: ${POSTGRES_USER:-ash}
       POSTGRES_DB: ${POSTGRES_DB:-pokeapi}
     volumes:
-      - .:/code
+      - ../PokeAPI:/code
     links:
       - db
       - cache
@@ -42,19 +48,21 @@ services:
     restart: always
     networks:
       - pokedex-network
+
   web:
     image: nginx:1.27.3-alpine3.20
     ports:
       - "80:80"
       - "443:443"
     restart: always
-    # command: [nginx-debug, '-g', 'daemon off;']
     volumes:
       - ./Resources/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./Resources/nginx/ssl:/ssl:ro
       - graphql_cache:/tmp/cache
+      - ../dist/browser:/usr/share/nginx/html:ro
     networks:
       - pokedex-network
+
   graphql-engine:
     image: hasura/graphql-engine:v2.45.1
     ports:
@@ -72,23 +80,9 @@ services:
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET:-pokemon}
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: anon
       HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
-      # HASURA_GRAPHQL_CONSOLE_ASSETS_DIR: /srv/console-assets
     networks:
       - pokedex-network
-  pokedex:
-    build:
-      context: ../Pokedex  # Adjust this path to where your Blazor app lives
-      dockerfile: Dockerfile
-    ports:
-      - "5000:8080"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-    depends_on:
-      - graphql-engine  # Wait for the GraphQL engine to start
-      - db              # Wait for the database to start
-    networks:
-      - pokedex-network
-    restart: always
+
 volumes:
   pg_data:
   redis_data:

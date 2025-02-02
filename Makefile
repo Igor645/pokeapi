@@ -64,9 +64,6 @@ docker-destroy-db:  # (Docker) Removes the volume where the database is installe
 	docker rm -f pokeapi_db_1
 	docker volume rm pokeapi_pg_data
 
-docker-rebuild:  # (Docker) Force rebuild of images
-	docker compose build --no-cache pokedex
-
 docker-shell:  # (Docker) Launch an interative shell for the pokeapi container
 	docker compose exec app sh -l
 
@@ -82,7 +79,7 @@ docker-test:  # (Docker) Run tests
 docker-prod:
 	docker compose -f docker-compose.yml -f docker-compose.override.yml -f Resources/compose/docker-compose-prod-graphql.yml up -d
 
-docker-setup: docker-rebuild docker-up docker-migrate docker-build-db  # (Docker) Start services, prepare the latest DB schema, populate the DB
+docker-setup: docker-up docker-migrate docker-build-db  # (Docker) Start services, prepare the latest DB schema, populate the DB
 
 format:  # Format the source code
 	black .
