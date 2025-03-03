@@ -107,10 +107,8 @@ sync-to-veekun: pull pull-veekun  # Copy data from this repository to ../pokedex
 hasura-export:  # Export Hasura configuration, be sure to have set HASURA_GRAPHQL_ADMIN_SECRET
 	hasura md export --project graphql
 
-hasura-apply:  # Apply Hasura metadata after waiting for Hasura to start
-	@echo "Waiting for Hasura to be ready..."
-	@until curl -s http://localhost:8080/v1/version; do sleep 5; done
-	hasura metadata apply --project graphql
+hasura-apply:  # Apply local Hasura configuration, be sure to have set HASURA_GRAPHQL_ADMIN_SECRET
+	hasura md apply --project graphql
 
 hasura-get-anon-schema:  # Dumps GraphQL schema
 	gq http://localhost:8080/v1/graphql --introspect > graphql/schema.graphql

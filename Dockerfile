@@ -1,14 +1,21 @@
 # Use Python base image
 FROM python:3.10
 
-# Install required system dependencies
+# Install required system dependencies (Git, curl, etc.)
 RUN apt-get update && apt-get install -y git curl
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy project files
+# Copy the project files
+# Copy project files, including Hasura metadata
 COPY . /app
+RUN mkdir -p /app/graphql
+ 
+# Ensure submodules are initialized
+RUN rm -rf data/v2 && git clone --depth 1 --recurse-submodules https://github.com/PokeAPI/pokeapi.git /app/temp_pokeapi \
+    && cp -r /app/temp_pokeapi/data/v2 /app/data/v2 \
+    && rm -rf /app/temp_pokeapi
 
 # Install Hasura CLI
 RUN curl -L https://github.com/hasura/graphql-engine/raw/stable/cli/get.sh | bash
@@ -25,11 +32,8 @@ RUN make setup && make migrate
 # Build the database
 RUN make build-db
 
-# Start Hasura in the background
-RUN docker compose up -d graphql-engine
-
-# Apply Hasura metadata using make (which now waits for Hasura)
-RUN make hasura-apply
+# Apply Hasura metadata
+# RUN make hasura-apply
 
 # Expose port 8000 (default for PokeAPI)
 EXPOSE 8000
