@@ -8,7 +8,9 @@ RUN apt-get update && apt-get install -y git curl
 WORKDIR /app
 
 # Copy the project files
-COPY . .
+# Copy project files, including Hasura metadata
+COPY . /app
+RUN mkdir -p /app/graphql
  
 # Ensure submodules are initialized
 RUN rm -rf data/v2 && git clone --depth 1 --recurse-submodules https://github.com/PokeAPI/pokeapi.git /app/temp_pokeapi \
