@@ -39,4 +39,4 @@ RUN make build-db
 EXPOSE 8000
 
 # Start the API
-CMD ["make", "serve"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
