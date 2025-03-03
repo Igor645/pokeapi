@@ -9,7 +9,7 @@ WORKDIR /app
 
 # Copy the project files
 COPY . .
-
+ 
 # Ensure submodules are initialized
 RUN rm -rf data/v2 && git clone --depth 1 --recurse-submodules https://github.com/PokeAPI/pokeapi.git /app/temp_pokeapi \
     && cp -r /app/temp_pokeapi/data/v2 /app/data/v2 \
