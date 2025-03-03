@@ -25,7 +25,7 @@ ENV PATH="/root/.hasura:$PATH"
 RUN make install
 
 # Run database migrations
-RUN make setup && make migrate --noinput
+RUN make setup && make migrate
 
 # Build the database
 RUN make build-db
