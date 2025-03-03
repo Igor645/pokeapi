@@ -34,7 +34,7 @@ clean:  # Remove any pyc files
 	find . -type f -name '*.pyc' -delete
 
 migrate:  # Run any outstanding migrations
-	python manage.py migrate --noinput ${local_config}
+	python manage.py migrate --noinput --verbosity 3 ${local_config}
 
 make-migrations:  # Create migrations files if schema has changed
 	python manage.py makemigrations ${local_config}
